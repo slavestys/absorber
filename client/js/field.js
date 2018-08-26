@@ -4,10 +4,15 @@ var Field = function(canvas) {
     self.ctx = self.canvas.getContext('2d');
     self.circles = [];
     self.timer_id = null;
+    self.currentUserId = null;
+    self.currentUser = null;
+    self.userPoints = [];
+    self.canvasPos = Utils.getPosition(canvas);
 
     self.addCircle = function(x, y, square){
         var circle = new Circle(x, y, square);
-        self.circles.push(circle)
+        self.circles.push(circle);
+        return circle;
     };
 
     self.draw = function(){
@@ -15,9 +20,26 @@ var Field = function(canvas) {
       self.ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
       for(var i = 0; i < self.circles.length; i++){
           var circle = self.circles[i];
-          circle.draw(self.ctx);
+          circle.draw(self.ctx, self.currentUser);
       }
     };
+
+    function takeUserPoint(x1, y1, x2, y2){
+        var userPoint = null;
+        var userPointIndex = null;
+        for(var i = 0; i < self.userPoints.length; i++){
+            var x = self.userPoints[i].x;
+            var y = self.userPoints[i].y;
+            if(x1 <= x && x2 >= x && y1 <= y && y2 >= y){
+                userPoint = self.userPoints[i];
+                userPointIndex = i;
+            }
+        }
+        if(userPoint){
+            self.userPoints.splice(userPointIndex, 1)
+        }
+        return userPoint;
+    }
 
     function fillZone(x1, y1, x2, y2){
         var maxDiameterX = x2 - x1 - Config.interval;
@@ -27,10 +49,25 @@ var Field = function(canvas) {
             return
         }
         var radus = Math.round(Utils.randomInInterval(Config.minDiameter, maxDiameter) / 2);
-        var x = x1 + radus + Config.interval;
-        var y = y1 + radus + Config.interval;
-        var square = radus * radus * Math.PI;
-        self.addCircle(x, y, square);
+        var userPoint = takeUserPoint(x1, y1, x2, y2);
+        var x = null;
+        var y = null;
+        if(userPoint){
+            x = userPoint.x;
+            y = userPoint.y;
+            var circle = self.addCircle(x, y, userPoint.data.square);
+            circle.userId = userPoint.data.id;
+            if(userPoint.data.id == self.currentUserId){
+                self.currentUser = circle;
+            }
+        }
+        else
+        {
+            x = x1 + radus + Config.interval;
+            y = y1 + radus + Config.interval;
+            var square = radus * radus * Math.PI;
+            self.addCircle(x, y, square);
+        }
         fillZone(x + radus, y1 + Config.interval, x2, y + radus);
         fillZone(x1 + Config.interval, y + radus, x2, y2);
     }
@@ -92,15 +129,15 @@ var Field = function(canvas) {
                         circle2 = buf;
                         deleteIndex = i;
                     }
-                    var intersection = Utils.circleIntersection(circle1.radius, circle2.radius, dest) * tickIntervalSeconds;
-                    if(intersection == NaN || !intersection || intersection == 'undefined'){
-                        Utils.circleIntersection(circle1.radius, circle2.radius, dest) * tickIntervalSeconds;
-                    }
+                    var intersection = Utils.circleIntersection(circle1.radius, circle2.radius, dest);
                     circle1.absorb(intersection);
                     circle2.absorb(-intersection);
                     if(circle2.square < Config.circleSquareMin){
                         if(!forDelete.includes(deleteIndex)){
                             forDelete.push(deleteIndex);
+                            if(circle2.userId == self.currentUserId){
+                                self.currentUser = null;
+                            }
                         }
                     }
                 }
@@ -119,10 +156,65 @@ var Field = function(canvas) {
         self.draw();
         for(var i = 0; i < self.circles.length; i++){
             var circle = self.circles[i];
+            if(circle.userId){
+                continue;
+            }
             circle.speedX = Utils.randomInInterval(Config.minSpeed, Config.maxSpeed);
             circle.speedY = Utils.randomInInterval(Config.minSpeed, Config.maxSpeed);
         }
         self.timer_id = setInterval(self.tick, Config.tickInterval)
     };
 
+    self.setUsers = function(users){
+        var rows = Math.ceil(Math.sqrt(users.length));
+        var pointSizeX = self.canvas.width / rows;
+        var pointSizeY = self.canvas.height / rows;
+        for(var i = 0; i < rows; i++){
+            for(var j = 0; j < rows; j++){
+                if(i * j + j > users.length){
+                    break;
+                }
+                var x = pointSizeX * i + pointSizeX / 2;
+                var y = pointSizeY * j + pointSizeY / 2;
+                self.userPoints.push({
+                    x: x,
+                    y: y,
+                    data: users[i * j + j]
+                })
+            }
+        }
+    };
+
+    self.setCurrentUserId = function(userId){
+        self.currentUserId = userId;
+    };
+
+    self.mouseClick = function(event){
+        if(!self.currentUser){
+            return;
+        }
+
+        var x = event.clientX - self.canvasPos.x - self.currentUser.x;
+        var y = event.clientY - self.canvasPos.y - self.currentUser.y;
+        var len = Math.sqrt(x * x + y * y);
+        var a = Math.acos(x / len) * y / Math.abs(y);
+        var newCircleSquare = self.currentUser.square * Config.speedChangeSquarePercent;
+        var newCircleRadius = Utils.circleRadius(newCircleSquare);
+        var dest = self.currentUser.radius + newCircleRadius + 1;
+        var newCircleX = self.currentUser.x + dest * Math.cos(a);
+        var newCircleY = self.currentUser.y + dest * Math.sin(a);
+        var circle = self.addCircle(newCircleX, newCircleY, newCircleSquare);
+        circle.speedX = Math.cos(a) * self.currentUser.square / newCircleSquare;
+        circle.speedY = Math.sin(a) * self.currentUser.square / newCircleSquare;
+        self.currentUser.speedX -= Math.cos(a);
+        self.currentUser.speedY -= Math.sin(a);
+        self.currentUser.square -= newCircleSquare;
+        self.currentUser.updateRadius();
+    };
+
+    self.init = function(){
+        self.canvas.addEventListener("click", self.mouseClick, false);
+    };
+
+    self.init();
 };

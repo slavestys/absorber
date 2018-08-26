@@ -16,5 +16,22 @@ var Utils = {
         var s1 = (r1 * r1) * (a1 - Math.sin(a1)) / 2;
         var s2 = (r2 * r2) * (a2 - Math.sin(a2)) / 2;
         return s1 + s2;
+    },
+    circleRadius: function(square){
+        return Math.ceil(Math.sqrt(square / Math.PI))
+    },
+    getPosition: function(el) {
+        var xPosition = 0;
+        var yPosition = 0;
+
+        while (el) {
+            xPosition += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+            yPosition += (el.offsetTop - el.scrollTop + el.clientTop);
+            el = el.offsetParent;
+        }
+        return {
+            x: xPosition,
+            y: yPosition
+        }
     }
 };
