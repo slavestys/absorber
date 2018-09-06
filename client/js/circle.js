@@ -1,11 +1,11 @@
-var Circle = function(x, y, square) {
+var Circle = function(circleData) {
     var self = this;
-    self.x = x;
-    self.y = y;
-    self.square = square;
-    self.speedX = 0;
-    self.speedY = 0;
-    self.userId = null;
+    self.x = circleData.x;
+    self.y = circleData.y;
+    self.square = circleData.square;
+    self.speedX = circleData.speedX;
+    self.speedY = circleData.speedY;
+    self.userId = circleData.userId;
 
     self.updateRadius = function() {
         self.radius = Utils.circleRadius(self.square);
@@ -18,7 +18,7 @@ var Circle = function(x, y, square) {
             ctx.fillStyle = 'blue';
         }
         else{
-            ctx.fillStyle = currentUser.square > self.square ? 'green' : 'red';
+            ctx.fillStyle = currentUser && currentUser.square > self.square ? 'green' : 'red';
         }
         ctx.fill();
     };

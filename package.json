@@ -1,0 +1,27 @@
+{
+  "name": "osmos",
+  "version": "1.0.0",
+  "description": "Become the biggest",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --watch '**/*.js' --exec ts-node server.js",
+    "bundle-colyseus-client": "browserify ./node_modules/colyseus.js/lib/index.js -s Colyseus -o client/js/colyseus.js"
+  },
+  "engines": {
+    "node": "8.11.4"
+  },
+  "author": "Вячеслав Краснов",
+  "license": "ISC",
+  "dependencies": {
+    "@colyseus/monitor": "^0.1.7",
+    "colyseus": "^0.9.15",
+    "colyseus.js": "^0.9.6",
+    "express": "^4.14.0",
+    "nodemon": "^1.11.0",
+    "serve-index": "^1.8.0",
+    "superagent": "^3.8.1"
+  },
+  "devDependencies": {
+    "browserify": "^14.4.0"
+  }
+}
