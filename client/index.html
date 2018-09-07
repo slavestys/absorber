@@ -7,11 +7,21 @@
         <script type="text/javascript" src="js/utils.js"></script>
         <script type="text/javascript" src="js/circle.js"></script>
         <script type="text/javascript" src="js/field.js"></script>
+        <script type="text/javascript" src="js/user_interface.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/main.css">
     </head>
     <body>
         <canvas height='320' width='480' id="osmos">
 
         </canvas>
+        <div class="menu" id="start_menu">
+            <h2>Osmos online</h2>
+            <a class="button" id="start" href="#">Начать</a>
+        </div>
+        <div class="menu hidden" id="restart_menu">
+            <h2>Игра окончена: <span></span></h2>
+            <a class="button" id="restart" href="#">Перезапуск</a>
+        </div>
     </body>
 </html>

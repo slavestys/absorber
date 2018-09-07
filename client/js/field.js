@@ -9,10 +9,15 @@ var Field = function(canvas) {
     self.userPoints = [];
     self.canvasPos = Utils.getPosition(canvas);
     self.room = null;
+    self.state = Config.states.idle;
+
+    self.clean = function(){
+        self.ctx.fillStyle = '#FFFFFF';
+        self.ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
+    };
 
     self.draw = function(){
-      self.ctx.fillStyle = '#FFFFFF';
-      self.ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
+      self.clean();
       for(let i in self.circles){
           let circle = self.circles[i];
           circle.draw(self.ctx, self.currentUser);
@@ -81,18 +86,14 @@ var Field = function(canvas) {
         self.draw();
     };
 
-
-    self.init = function(){
-        self.canvas.addEventListener("click", self.mouseClick, false);
-
-        let host = window.document.location.host.replace(/:.*/, '');
-
-        let client = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':'+location.port : ''));
-        self.room = client.join("field");
+    self.start = function(){
+        if(self.state != Config.states.idle) return;
+        self.room = self.colyseusClient.join("field");
 
         self.room.onJoin.add(function () {
             console.log("joined");
             //self.timer_id = setInterval(self.tick, Config.tickInterval);
+            self.state = Config.states.game;
         });
 
         self.room.onStateChange.add(function(state) {
@@ -105,24 +106,24 @@ var Field = function(canvas) {
         });
 
         self.room.onLeave.add(function(e){
+            self.stop(e);
             console.log('Game over:', e);
         });
+    };
 
-        // self.room.listen("circles/:id", (change) => {
-        //     if(!Object.keys(self.circles).length){
-        //         return;
-        //     }
-        //     // let circle = self.circles[parseInt(change.path["id"])];
-        //     // if(!circle)
-        //     // {
-        //     //     return;
-        //     // }
-        //     // circle[change.path["attribute"]] = change.value;
-        //     //console.log(change.operation); // => "replace" (can be "add", "remove" or "replace")
-        //     // console.log(change.path["id"]); // => "f98h3f"
-        //     // console.log(change.path["attribute"]); // => "y"
-        //     // console.log(change.value); // => 1
-        // })
+    self.stop = function(code){
+        if(self.state != Config.states.game) return;
+        let gameOverEvent = new CustomEvent('game_over', { 'detail': code});
+        self.state = Config.states.idle;
+        self.clean();
+        document.dispatchEvent(gameOverEvent);
+    };
+
+    self.init = function(){
+        self.canvas.addEventListener("click", self.mouseClick, false);
+
+        let host = window.document.location.host.replace(/:.*/, '');
+        self.colyseusClient = new Colyseus.Client(location.protocol.replace("http", "ws") + host + (location.port ? ':'+location.port : ''));
     };
 
     self.init();

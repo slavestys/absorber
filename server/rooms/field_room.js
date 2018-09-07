@@ -62,8 +62,8 @@ class FieldRoom extends colyseus.Room {
     }
 
     finish_game(client, code){
-        this.send(client, {message: 'Game over', code: code});
-        client.close(code, 'Game over');
+        this.send(client, {message: 'game_over', code: code});
+        client.close(code, 'game_over');
     }
 }
 

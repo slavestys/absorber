@@ -6,7 +6,13 @@ Config = {
     maxSpeed: 1,
     tickInterval: 50,
     circleSquareMin: 3,
-    speedChangeSquarePercent: 0.03
+    speedChangeSquarePercent: 0.03,
+    states: {
+        idle: 0,
+        game: 1
+    },
+    codeWin: 4000,
+    codeFail: 4001
 };
 Config.minDiameter = Config.minRadius * 2;
 Config.maxDiameter = Config.maxRadius * 2;
