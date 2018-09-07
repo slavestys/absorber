@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", function(){
     var canvas = document.getElementById("osmos");
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
     var field = new Field(canvas);
     var userInterface = new UserInterface(canvas.offsetLeft, canvas.offsetTop, canvas.width, canvas.height);
 

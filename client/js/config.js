@@ -15,6 +15,10 @@ Config = {
         idle: 0,
         game: 1
     },
+    field:{
+        width: 480,
+        height: 320
+    }
 };
 Config.minDiameter = Config.minRadius * 2;
 Config.maxDiameter = Config.maxRadius * 2;

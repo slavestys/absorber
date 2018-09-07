@@ -11,9 +11,9 @@ var Circle = function(circleData) {
         self.radius = Utils.circleRadius(self.square);
     };
 
-    self.draw = function(ctx, currentUser) {
+    self.draw = function(ctx, currentUser, scale) {
         ctx.beginPath();
-        ctx.arc(self.x, self.y, self.radius, 0, 2 * Math.PI, false);
+        ctx.arc(self.x * scale, self.y * scale, self.radius * scale, 0, 2 * Math.PI, false);
         if(currentUser && self.userId == currentUser.userId){
             ctx.fillStyle = 'blue';
         }

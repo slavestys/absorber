@@ -7,9 +7,10 @@ var Field = function(canvas) {
     self.currentUserId = null;
     self.currentUser = null;
     self.userPoints = [];
-    self.canvasPos = Utils.getPosition(canvas);
+    self.canvasPos = null;
     self.room = null;
     self.state = Config.states.idle;
+    self.scale = null;
 
     self.clean = function(){
         self.ctx.fillStyle = '#FFFFFF';
@@ -20,7 +21,7 @@ var Field = function(canvas) {
       self.clean();
       for(let i in self.circles){
           let circle = self.circles[i];
-          circle.draw(self.ctx, self.currentUser);
+          circle.draw(self.ctx, self.currentUser, self.scale);
       }
     };
 
@@ -65,8 +66,8 @@ var Field = function(canvas) {
             return;
         }
 
-        let x = event.clientX - self.canvasPos.x - self.currentUser.x;
-        let y = event.clientY - self.canvasPos.y - self.currentUser.y;
+        let x = (event.clientX - self.canvasPos.x) / self.scale - self.currentUser.x;
+        let y = (event.clientY - self.canvasPos.y) / self.scale - self.currentUser.y;
         self.room.send({command: "click", x: x, y: y});
     };
 
@@ -97,7 +98,7 @@ var Field = function(canvas) {
         });
 
         self.room.onStateChange.add(function(state) {
-            console.log('state refresh ', state);
+            //console.log('state refresh ', state);
             self.refreshState(state);
         });
 
@@ -120,6 +121,16 @@ var Field = function(canvas) {
     };
 
     self.init = function(){
+        self.scale = self.canvas.width / Config.field.width;
+        let newHeight = self.scale * Config.field.height;
+        if(newHeight > self.canvas.height){
+            self.scale = self.canvas.height / Config.field.height;
+            self.canvas.width = Config.field.width * self.scale;
+        }
+        else{
+            self.canvas.height = Config.field.height * self.scale;
+        }
+        self.canvasPos = Utils.getPosition(canvas);
         self.canvas.addEventListener("click", self.mouseClick, false);
 
         let host = window.document.location.host.replace(/:.*/, '');

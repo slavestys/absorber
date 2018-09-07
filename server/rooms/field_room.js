@@ -7,9 +7,7 @@ class FieldRoom extends colyseus.Room {
         this.maxClients = 4;
         this.clientIdToClient = {};
         console.log("Field created!", options);
-        var width = 480;
-        var height = 320;
-        this.setState(new FieldState(width,  height, this.maxClients));
+        this.setState(new FieldState(Config.field.width,  Config.field.height, this.maxClients));
         this.setSimulationInterval(() => this.tick(), Config.serverTickInterval);
     }
 
