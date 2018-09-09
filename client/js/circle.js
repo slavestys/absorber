@@ -28,7 +28,7 @@ var Circle = function(circleData) {
     };
 
     self.absorb = function(intersectionSquare){
-        self.square += intersectionSquare;
+        self.square += intersectionSquare * (Config.clientTickInterval / Config.serverTickInterval);
         self.updateRadius();
     };
 

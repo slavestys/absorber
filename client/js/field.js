@@ -26,13 +26,13 @@ var Field = function(canvas) {
     };
 
     self.tick = function(){
-        var tickIntervalSeconds = Config.tickInterval / 1000;
-        for(var i = 0; i < self.circles.length; i++){
-            var circle = self.circles[i];
-            var dx = circle.speedX * tickIntervalSeconds;
-            var dy = circle.speedY * tickIntervalSeconds;
-            var x = circle.x + dx;
-            var y = circle.y + dy;
+        let tickIntervalSeconds = Config.clientTickInterval / 1000;
+        for(let i in self.circles){
+            let circle = self.circles[i];
+            let dx = circle.speedX * tickIntervalSeconds;
+            let dy = circle.speedY * tickIntervalSeconds;
+            let x = circle.x + dx;
+            let y = circle.y + dy;
             if(x - circle.radius < 0){
                 x = -(x - circle.radius) + circle.radius;
                 circle.speedX = -circle.speedX;
@@ -52,6 +52,26 @@ var Field = function(canvas) {
             }
             circle.x = x;
             circle.y = y;
+        }
+        let circlesArray = Object.values(self.circles);
+        for(let i = 0; i < circlesArray.length; i++){
+            for(let j = circlesArray.length - 1; j > i; j--){
+                let circle1 = circlesArray[i];
+                let circle2 = circlesArray[j];
+                let dx = Math.abs(circle1.x - circle2.x);
+                let dy = Math.abs(circle1.y - circle2.y);
+                let dest = Math.sqrt(dx * dx + dy * dy);
+                if(dest < circle1.radius + circle2.radius){
+                    if(circle1.square < circle2.square){
+                        let buf = circle1;
+                        circle1 = circle2;
+                        circle2 = buf;
+                    }
+                    let intersection = Utils.circleIntersection(circle1.radius, circle2.radius, dest);
+                    circle1.absorb(intersection);
+                    circle2.absorb(-intersection);
+                }
+            }
         }
 
         self.draw();
@@ -93,7 +113,7 @@ var Field = function(canvas) {
 
         self.room.onJoin.add(function () {
             console.log("joined");
-            //self.timer_id = setInterval(self.tick, Config.tickInterval);
+            self.timer_id = setInterval(self.tick, Config.clientTickInterval);
             self.state = Config.states.game;
         });
 
@@ -117,6 +137,7 @@ var Field = function(canvas) {
         let gameOverEvent = new CustomEvent('game_over', { 'detail': code});
         self.state = Config.states.idle;
         self.clean();
+        clearInterval((self.timer_id));
         document.dispatchEvent(gameOverEvent);
     };
 
