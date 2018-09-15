@@ -13,13 +13,31 @@ var Circle = function(circleData) {
 
     self.draw = function(ctx, currentUser, scale) {
         ctx.beginPath();
-        ctx.arc(self.x * scale, self.y * scale, self.radius * scale, 0, 2 * Math.PI, false);
+        let screenX = self.x * scale;
+        let screenY = self.y * scale;
+        let screenRadius = self.radius * scale;
+        var radgrad = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, screenRadius);
+        ctx.arc(screenX, screenY, screenRadius, 0, 2 * Math.PI, false);
+        let color1, color2;
         if(currentUser && self.userId == currentUser.userId){
-            ctx.fillStyle = 'blue';
+            color1 = '#0000FF';
+            color2 = '#000099';
+            radgrad.addColorStop(1, '#0000FF');
         }
         else{
-            ctx.fillStyle = currentUser && currentUser.square > self.square ? 'green' : 'red';
+            if(currentUser && currentUser.square > self.square){
+                color1 = '#00FF00';
+                color2 = '#009900';
+            }
+            else{
+                color1 = '#FF0000';
+                color2 = '#990000';
+            }
         }
+        radgrad.addColorStop(1, color1);
+        radgrad.addColorStop(0.5, color2);
+        radgrad.addColorStop(0, '#FFFFFF');
+        ctx.fillStyle = radgrad;
         ctx.fill();
     };
 
