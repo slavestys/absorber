@@ -20,8 +20,11 @@ var Field = function(canvas) {
 
     self.draw = function(){
       self.clean();
-      for(let i in self.circles){
-          let circle = self.circles[i];
+      let sortedCircles = Object.values(self.circles).sort(function(circle1, circle2){
+          return circle1.radius > circle2.radius;
+      });
+      for(let i in sortedCircles){
+          let circle = sortedCircles[i];
           circle.draw(self.ctx, self.currentUser, self.scale);
       }
     };
