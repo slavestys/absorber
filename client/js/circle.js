@@ -16,6 +16,9 @@ var Circle = function(circleData) {
         let screenX = self.x * scale;
         let screenY = self.y * scale;
         let screenRadius = self.radius * scale;
+        if(isNaN(screenRadius)){
+            return;
+        }
         var radgrad = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, screenRadius);
         ctx.arc(screenX, screenY, screenRadius, 0, 2 * Math.PI, false);
         let color1, color2;
