@@ -11,6 +11,7 @@ var Field = function(canvas) {
     self.room = null;
     self.state = Config.states.idle;
     self.scale = null;
+    self.gameState = null;
 
     self.clean = function(){
         self.ctx.fillStyle = '#FFFFFF';
@@ -91,29 +92,49 @@ var Field = function(canvas) {
         self.room.send({command: "click", x: x, y: y});
     };
 
+    self.beginGame = function(event){
+        self.room.send({command: "begin_game"});
+    };
+
     self.refreshState = function(state){
-        self.circles = {};
-        for(let i in state.circles){
-            let circleData = state.circles[i];
-            self.circles[i] = new Circle(circleData);
-        }
-        self.currentUserId = state.users[self.room.sessionId];
-        if(self.currentUserId){
-            self.currentUser = self.circles[self.currentUserId];
+        if(state.state == Config.game_states.process){
+            if(this.gameState != Config.game_states.process){
+                let gameStartEvent = new Event('game_started');
+                document.dispatchEvent(gameStartEvent);
+                self.gameState = Config.game_states.process;
+                self.timer_id = setInterval(self.tick, Config.clientTickInterval);
+            }
+            self.circles = {};
+            for(let i in state.circles){
+                let circleData = state.circles[i];
+                self.circles[i] = new Circle(circleData);
+            }
+            self.currentUserId = state.users[self.room.sessionId];
+            if(self.currentUserId){
+                self.currentUser = self.circles[self.currentUserId];
+            }
+            else{
+                self.currentUser = null;
+            }
+            self.draw();
         }
         else{
-            self.currentUser = null;
+            let secondsRemain = Math.floor((state.createdAt.getTime() + Config.secondsToStart *1000 - state.currentTime.getTime()) / 1000);
+            let isOwner = self.room.sessionId == state.owner;
+            let gameStartingEvent = new CustomEvent('game_starting',
+                    { 'detail': {'seconds_remain': secondsRemain, 'is_owner': isOwner}}
+                );
+            document.dispatchEvent(gameStartingEvent);
         }
-        self.draw();
     };
 
     self.start = function(){
         if(self.state != Config.states.idle) return;
+        self.gameState = Config.game_states.starting;
         self.room = self.colyseusClient.join("field");
 
         self.room.onJoin.add(function () {
             console.log("joined");
-            self.timer_id = setInterval(self.tick, Config.clientTickInterval);
             self.state = Config.states.game;
         });
 

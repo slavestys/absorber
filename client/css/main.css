@@ -1,11 +1,8 @@
-.hidden{
-    display: none;
-}
-
 .menu{
     display: block;
     position: absolute;
     text-align: center;
+    display: none;
 }
 
 html, body {

@@ -12,19 +12,42 @@ UserInterface = function(x, y, width, height){
     self.restartMenuElement = document.getElementById("restart_menu");
     self.restartButton = document.getElementById("restart");
 
+    self.startingMenuElement = document.getElementById("starting_menu");
+    self.beginButton = document.getElementById("begin");
+
     self.startEvent = new Event('start_game');
     self.restartEvent = new Event('restart_game');
+    self.beginEvent = new Event('begin_game');
 
     self.startGame = function(){
         self.startMenuElement.style.display = 'none';
         self.restartMenuElement.style.display = 'none';
+        self.startingMenuElement.style.display = 'block';
         document.dispatchEvent(self.startEvent);
+    };
+
+    self.beginGame = function(){
+        document.dispatchEvent(self.beginEvent);
     };
 
     self.onGameOver = function(code){
         let message = code == Config.codeWin ? 'Вы победили' : 'Вы проиграли';
         self.restartMenuElement.querySelector('span').innerHTML = message;
         self.restartMenuElement.style.display = 'block';
+    };
+
+    self.onGameStarting = function(data){
+        self.startingMenuElement.querySelector('span').innerHTML = data.seconds_remain;
+        if(data.is_owner){
+            self.beginButton.style.display = 'block';
+        }
+        else{
+            self.beginButton.style.display = 'none';
+        }
+    };
+
+    self.onGameStarted = function(){
+        self.startingMenuElement.style.display = 'none';
     };
 
     function alignElement(elem){
@@ -37,13 +60,16 @@ UserInterface = function(x, y, width, height){
     self.alignElements = function(){
         alignElement(self.startMenuElement);
         alignElement(self.restartMenuElement);
-        self.restartMenuElement.style.display = 'none';
+        alignElement(self.startingMenuElement);
+        self.startMenuElement.style.display = 'block';
     };
 
     self.init = function(){
         self.alignElements();
         self.startButton.addEventListener("click", self.startGame, false);
         self.restartButton.addEventListener("click", self.startGame, false);
+        self.beginButton.addEventListener("click", self.beginGame, false);
+        self.beginButton.style.display = 'none';
     };
 
     self.init();

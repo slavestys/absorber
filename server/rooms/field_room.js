@@ -9,6 +9,16 @@ class FieldRoom extends colyseus.Room {
         console.log("Field created!", options);
         this.setState(new FieldState(Config.field.width,  Config.field.height, this.maxClients));
         this.setSimulationInterval(() => this.tick(), Config.serverTickInterval);
+        this.idleTimer = this.clock.setTimeout(() => this.start_game(), Config.secondsToStart * 1000);
+    }
+
+    start_game(){
+        this.idleTimer.clear();
+        this.state.start_game();
+    }
+
+    requestJoin(){
+        return this.isNew || this.state.state == Config.game_states.starting;
     }
 
     onJoin(client){
@@ -24,8 +34,17 @@ class FieldRoom extends colyseus.Room {
 
     onMessage(client, data){
         console.log("Field received message from", client.sessionId, ":", data);
-        if(data.command = 'click'){
-            this.state.click(client.sessionId, data.x, data.y);
+        if(this.state.state == Config.game_states.process){
+            if(data.command = 'click'){
+                this.state.click(client.sessionId, data.x, data.y);
+            }
+        }
+        else{
+            if(data.command = 'begin_game'){
+                if(client.sessionId == this.state.owner){
+                    this.start_game();
+                }
+            }
         }
     }
 
@@ -33,7 +52,11 @@ class FieldRoom extends colyseus.Room {
         console.log("Dispose Field");
     }
 
-    tick(){
+    starting_tick(){
+        this.state.updateCurrentTime();
+    }
+
+    process_tick(){
         let deletedUsers = this.state.tick();
         let winner = this.state.winner();
         if(winner){
@@ -55,6 +78,15 @@ class FieldRoom extends colyseus.Room {
                 this.finish_game(client, Config.codeFail);
                 delete this.clientIdToClient[userId];
             }
+        }
+    }
+
+    tick(){
+        if(this.state.state == Config.game_states.starting){
+            this.starting_tick();
+        }
+        else{
+            this.process_tick();
         }
 
     }

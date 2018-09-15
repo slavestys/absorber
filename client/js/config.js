@@ -15,10 +15,15 @@ Config = {
         idle: 0,
         game: 1
     },
+    game_states: {
+        starting: 0,
+        process: 1
+    },
     field:{
         width: 480,
         height: 320
-    }
+    },
+    secondsToStart: 30
 };
 Config.minDiameter = Config.minRadius * 2;
 Config.maxDiameter = Config.maxRadius * 2;

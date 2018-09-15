@@ -7,23 +7,32 @@ class FieldState{
         this.width = width;
         this.height = height;
         this.usersCount = usersCount;
+        this.usedUserPoints = {};
         this.userPoints = [];
         this.initUserPoints();
-        this.nextCircleId = 0;
+        this.nextCircleId = 1;
         this.users = {};
         this.circles = {};
         this.biggest = null;
         this.squareSum = 0;
+        this.state = Config.game_states.starting;
+        this.createdAt = new Date();
+        this.currentTime = new Date();
+        this.owner = null;
+    }
+
+    start_game(){
         this.fill();
+        this.state = Config.game_states.process
     }
 
     takeUserPoint(x1, y1, x2, y2){
-        var userPoint = null;
-        for(var i = 0; i < this.userPoints.length; i++){
-            var x = this.userPoints[i].x;
-            var y = this.userPoints[i].y;
+        let userPoint = null;
+        for(let i in this.usedUserPoints){
+            let x = this.usedUserPoints[i].x;
+            let y = this.usedUserPoints[i].y;
             if(x1 <= x && x2 >= x && y1 <= y && y2 >= y){
-                userPoint = this.userPoints[i];
+                userPoint = this.usedUserPoints[i];
             }
         }
         return userPoint;
@@ -96,9 +105,13 @@ class FieldState{
         if(!this.userPoints.length){
             return
         }
-        var userPoint = this.userPoints.splice(0, 1)[0];
-        var circle = this.addCircle(userPoint.x, userPoint.y, 2500);
+        let userPoint = this.userPoints.splice(0, 1)[0];
+        this.usedUserPoints[userId] = userPoint;
+        let circle = this.addCircle(userPoint.x, userPoint.y, 2500);
         circle.userId = userId;
+        if(!Object.keys(this.users).length){
+            this.owner = userId;
+        }
         this.users[userId] = circle.id;
     }
 
@@ -108,9 +121,17 @@ class FieldState{
         this.userPoints.push({x: circle.x, y: circle.y});
         delete this.circles[circleId];
         delete this.users[userId];
+        delete this.usedUserPoints[userId];
+        if(this.owner == userId){
+            let newOwnerId = Object.keys(this.users)[0];
+            if(newOwnerId){
+                this.owner = newOwnerId;
+            }
+        }
     }
 
     tick(){
+        this.updateCurrentTime();
         let tickIntervalSeconds = Config.serverTickInterval / 1000;
         this.squareSum = 0;
         this.biggest = null;
@@ -222,6 +243,10 @@ class FieldState{
         else{
             return null;
         }
+    }
+
+    updateCurrentTime(){
+        this.currentTime = new Date();
     }
 }
 
