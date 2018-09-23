@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function(){
-    var canvas = document.getElementById("osmos");
+    var canvas = document.getElementById("absorber");
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
     var field = new Field(canvas);
