@@ -1,0 +1,16 @@
+{
+  "apps" : [{
+    "name" : "absorber",
+    "script" : "server.js"
+  }],
+  "deploy" : {
+    "production" : {
+      "user" : "ubuntu",
+      "host" : ["ec2-18-191-230-239.us-east-2.compute.amazonaws.com"],
+      "ref"  : "origin/master",
+      "repo" : "https://github.com/slavestys/absorber.git",
+      "path" : "/home/ubuntu/absorber",
+      "post-deploy" : "npm install && npm run bundle-colyseus-client && pm2 startOrRestart ecosystem.json --env production"
+    }
+  }
+}
