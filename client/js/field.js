@@ -87,7 +87,7 @@ var Field = function(canvas) {
             let secondsRemain = Math.floor((state.createdAt.getTime() + Config.secondsToStart *1000 - state.currentTime.getTime()) / 1000);
             let isOwner = self.room.sessionId == state.owner;
             let gameStartingEvent = new CustomEvent('game_starting',
-                    { 'detail': {'seconds_remain': secondsRemain, 'is_owner': isOwner}}
+                    { 'detail': {'seconds_remain': secondsRemain, 'is_owner': isOwner, users: Object.keys(state.usedUserPoints).length}}
                 );
             document.dispatchEvent(gameStartingEvent);
         }

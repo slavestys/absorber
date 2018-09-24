@@ -37,7 +37,10 @@ UserInterface = function(x, y, width, height){
     };
 
     self.onGameStarting = function(data){
-        self.startingMenuElement.querySelector('span').innerHTML = data.seconds_remain;
+        let secondsSpan = document.getElementById('seconds_to_start');
+        secondsSpan.innerHTML = data.seconds_remain;
+        let usersCount = document.getElementById('current_users_size');
+        usersCount.innerHTML = data.users;
         if(data.is_owner){
             self.beginButton.style.display = 'block';
         }
