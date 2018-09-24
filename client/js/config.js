@@ -4,7 +4,7 @@ Config = {
     interval: 5,
     minSpeed: -1,
     maxSpeed: 1,
-    clientTickInterval: 50,
+    clientTickInterval: 10,
     serverTickInterval: 200,
     circleSquareMin: 3,
     speedChangeSquarePercent: 0.03,
@@ -27,4 +27,8 @@ Config = {
 };
 Config.minDiameter = Config.minRadius * 2;
 Config.maxDiameter = Config.maxRadius * 2;
+Config.serverTickKoef = Config.serverTickInterval / 1000;
+Config.clientMoveKoef = Config.clientTickInterval / 1000;
+Config.clientAnimationKoef = Config.clientTickInterval / Config.serverTickInterval;
+Config.clientAbsorbKoef = Config.clientTickInterval / Config.serverTickInterval;
 module.exports = Config;

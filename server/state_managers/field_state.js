@@ -132,7 +132,6 @@ class FieldState{
 
     tick(){
         this.updateCurrentTime();
-        let tickIntervalSeconds = Config.serverTickInterval / 1000;
         this.squareSum = 0;
         this.biggest = null;
         for(let i in this.circles){
@@ -141,8 +140,8 @@ class FieldState{
             if(!this.biggest || circle.square > this.biggest.square){
                 this.biggest = circle;
             }
-            let dx = circle.speedX * tickIntervalSeconds;
-            let dy = circle.speedY * tickIntervalSeconds;
+            let dx = circle.speedX * Config.serverTickKoef;
+            let dy = circle.speedY * Config.serverTickKoef;
             let x = circle.x + dx;
             let y = circle.y + dy;
             if(x - circle.radius < 0){

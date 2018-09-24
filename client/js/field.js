@@ -30,52 +30,8 @@ var Field = function(canvas) {
     };
 
     self.tick = function(){
-        let tickIntervalSeconds = Config.clientTickInterval / 1000;
         for(let i in self.circles){
-            let circle = self.circles[i];
-            let dx = circle.speedX * tickIntervalSeconds;
-            let dy = circle.speedY * tickIntervalSeconds;
-            let x = circle.x + dx;
-            let y = circle.y + dy;
-            if(x - circle.radius < 0){
-                x = -(x - circle.radius) + circle.radius;
-                circle.speedX = -circle.speedX;
-            }
-            if(y - circle.radius < 0)
-            {
-                y = -(y - circle.radius) + circle.radius;
-                circle.speedY = -circle.speedY;
-            }
-            if(x + circle.radius > self.canvas.width){
-                x = self.canvas.width - circle.radius - (x + circle.radius - self.canvas.width);
-                circle.speedX = -circle.speedX;
-            }
-            if(y + circle.radius > self.canvas.height){
-                y = self.canvas.height - circle.radius - (y + circle.radius - self.canvas.height);
-                circle.speedY = -circle.speedY;
-            }
-            circle.x = x;
-            circle.y = y;
-        }
-        let circlesArray = Object.values(self.circles);
-        for(let i = 0; i < circlesArray.length; i++){
-            for(let j = circlesArray.length - 1; j > i; j--){
-                let circle1 = circlesArray[i];
-                let circle2 = circlesArray[j];
-                let dx = Math.abs(circle1.x - circle2.x);
-                let dy = Math.abs(circle1.y - circle2.y);
-                let dest = Math.sqrt(dx * dx + dy * dy);
-                if(dest < circle1.radius + circle2.radius){
-                    if(circle1.square < circle2.square){
-                        let buf = circle1;
-                        circle1 = circle2;
-                        circle2 = buf;
-                    }
-                    let intersection = Utils.circleIntersection(circle1.radius, circle2.radius, dest);
-                    circle1.absorb(intersection);
-                    circle2.absorb(-intersection);
-                }
-            }
+           self.circles[i].tick();
         }
 
         self.draw();
@@ -107,10 +63,17 @@ var Field = function(canvas) {
                 self.gameState = Config.game_states.process;
                 self.timer_id = setInterval(self.tick, Config.clientTickInterval);
             }
+            let oldCircles = self.circles;
             self.circles = {};
             for(let i in state.circles){
                 let circleData = state.circles[i];
-                self.circles[i] = new Circle(circleData);
+                if(oldCircles[i]){
+                    self.circles[i] = oldCircles[i];
+                    self.circles[i].update(circleData);
+                }
+                else{
+                  self.circles[i] = new Circle(circleData);
+                }
             }
             self.currentUserId = state.users[self.room.sessionId];
             if(self.currentUserId){
@@ -119,7 +82,6 @@ var Field = function(canvas) {
             else{
                 self.currentUser = null;
             }
-            self.draw();
         }
         else{
             let secondsRemain = Math.floor((state.createdAt.getTime() + Config.secondsToStart *1000 - state.currentTime.getTime()) / 1000);
@@ -160,6 +122,7 @@ var Field = function(canvas) {
         if(self.state != Config.states.game) return;
         let gameOverEvent = new CustomEvent('game_over', { 'detail': code});
         self.state = Config.states.idle;
+        self.circles = {};
         self.clean();
         clearInterval((self.timer_id));
         document.dispatchEvent(gameOverEvent);

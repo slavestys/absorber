@@ -1,10 +1,12 @@
 var Circle = function(circleData) {
     var self = this;
-    self.x = circleData.x;
-    self.y = circleData.y;
     self.square = circleData.square;
-    self.speedX = circleData.speedX;
-    self.speedY = circleData.speedY;
+    self.speedX = circleData.speedX * Config.clientAnimationKoef;
+    self.speedY = circleData.speedY * Config.clientAnimationKoef;
+    self.x = circleData.x - circleData.speedX;
+    self.y = circleData.y - circleData.speedY;
+    self.toSquare = self.square;
+    self.squareChangeSpeed = 0;
     self.userId = circleData.userId;
 
     self.updateRadius = function() {
@@ -48,9 +50,27 @@ var Circle = function(circleData) {
         self.updateRadius();
     };
 
-    self.absorb = function(intersectionSquare){
-        self.square += intersectionSquare * (Config.clientTickInterval / Config.serverTickInterval);
-        self.updateRadius();
+    self.update =  function(circleData){
+        let toX = circleData.x;
+        let toY = circleData.y;
+        self.speedX = (toX - self.x) * Config.clientAnimationKoef;
+        self.speedY = (toY - self.y) * Config.clientAnimationKoef;
+        self.toSquare = circleData.square;
+        self.squareChangeSpeed = (self.toSquare - self.square) * Config.clientAnimationKoef;
+    };
+
+    self.tick = function(){
+        self.x += self.speedX;
+        self.y += self.speedY;
+        if(self.squareChangeSpeed){
+            let squareWas = self.square;
+            self.square += self.squareChangeSpeed;
+            self.updateRadius();
+            if((squareWas - self.toSquare) * (self.square - self.toSquare) <= 0){
+                self.squareChangeSpeed = 0;
+                self.square = self.toSquare;
+            }
+        }
     };
 
     self.init();
