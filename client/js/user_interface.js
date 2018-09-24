@@ -42,7 +42,7 @@ UserInterface = function(x, y, width, height){
         let usersCount = document.getElementById('current_users_size');
         usersCount.innerHTML = data.users;
         if(data.is_owner){
-            self.beginButton.style.display = 'block';
+            self.beginButton.style.display = 'inline';
         }
         else{
             self.beginButton.style.display = 'none';

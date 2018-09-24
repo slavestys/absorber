@@ -15,4 +15,17 @@ html, body {
 #absorber{
     margin: 0 auto;
     display: block;
+    background: linear-gradient(0deg, #26558b 0%,#FFFFFF 100%);
+}
+
+.button{
+    color: #FFFFFF;
+    background: #3a8bc2;
+    padding:5px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.button:hover{
+    background: #26558b;
 }

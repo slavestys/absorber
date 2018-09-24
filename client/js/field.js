@@ -14,8 +14,7 @@ var Field = function(canvas) {
     self.gameState = null;
 
     self.clean = function(){
-        self.ctx.fillStyle = '#FFFFFF';
-        self.ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
+        self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
     };
 
     self.draw = function(){
